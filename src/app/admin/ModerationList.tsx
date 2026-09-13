@@ -14,13 +14,7 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-export function ModerationList({
-  secret,
-  reviews,
-}: {
-  secret: string;
-  reviews: Review[];
-}) {
+export function ModerationList({ reviews }: { reviews: Review[] }) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -36,7 +30,7 @@ export function ModerationList({
   function handle(id: string, status: "approved" | "rejected") {
     setPendingId(id);
     startTransition(async () => {
-      await setReviewStatusAction(secret, id, status);
+      await setReviewStatusAction(id, status);
       router.refresh();
       setPendingId(null);
     });

@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { isValidAdminSecret } from "@/lib/adminAuth";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { isAllowedAdminEmail } from "@/lib/adminAllowlist";
 
 export interface ActionResult {
   success: boolean;
@@ -13,11 +15,28 @@ export interface CreateReviewRequestResult extends ActionResult {
   link?: string;
 }
 
-export async function createReviewRequestAction(
-  secret: string,
-  formData: { customerName: string; orderNumber: string; productName: string }
-): Promise<CreateReviewRequestResult> {
-  if (!isValidAdminSecret(secret)) {
+// Every action re-checks the session itself — never trust that middleware
+// alone guarded the page this action was called from.
+async function requireAdmin() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user || !isAllowedAdminEmail(user.email)) {
+    return null;
+  }
+
+  return user;
+}
+
+export async function createReviewRequestAction(formData: {
+  customerName: string;
+  orderNumber: string;
+  productName: string;
+}): Promise<CreateReviewRequestResult> {
+  const admin = await requireAdmin();
+  if (!admin) {
     return { success: false, message: "غير مصرح لك." };
   }
 
@@ -43,7 +62,7 @@ export async function createReviewRequestAction(
     return { success: false, message: "صار خطأ أثناء إنشاء الطلب." };
   }
 
-  revalidatePath(`/admin/${secret}`);
+  revalidatePath("/admin");
 
   return {
     success: true,
@@ -53,11 +72,11 @@ export async function createReviewRequestAction(
 }
 
 export async function setReviewStatusAction(
-  secret: string,
   reviewId: string,
   status: "approved" | "rejected"
 ): Promise<ActionResult> {
-  if (!isValidAdminSecret(secret)) {
+  const admin = await requireAdmin();
+  if (!admin) {
     return { success: false, message: "غير مصرح لك." };
   }
 
@@ -71,7 +90,13 @@ export async function setReviewStatusAction(
     return { success: false, message: "صار خطأ أثناء تحديث الحالة." };
   }
 
-  revalidatePath(`/admin/${secret}`);
+  revalidatePath("/admin");
 
   return { success: true, message: "تم التحديث." };
+}
+
+export async function signOutAction() {
+  const supabase = await createServerSupabaseClient();
+  await supabase.auth.signOut();
+  redirect("/admin/login");
 }

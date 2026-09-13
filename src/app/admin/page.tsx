@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { isValidAdminSecret } from "@/lib/adminAuth";
+import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { isAllowedAdminEmail } from "@/lib/adminAllowlist";
 import type { Review } from "@/lib/types";
 import { NewRequestForm } from "./NewRequestForm";
 import { ModerationList } from "./ModerationList";
+import { signOutAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -23,16 +25,18 @@ const STATUS_STYLES: Record<Review["status"], string> = {
   rejected: "bg-red-100 text-red-700",
 };
 
-export default async function AdminPage({
-  params,
-}: {
-  params: Promise<{ secret: string }>;
-}) {
-  const { secret } = await params;
+export default async function AdminPage() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!isValidAdminSecret(secret)) {
-    notFound();
+  if (!user || !isAllowedAdminEmail(user.email)) {
+    redirect("/admin/login");
   }
+
+  const displayName =
+    (user.user_metadata?.full_name as string | undefined) || user.email;
 
   const { data } = await supabaseAdmin
     .from("reviews")
@@ -60,13 +64,21 @@ export default async function AdminPage({
 
   return (
     <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-10 space-y-10">
-      <header>
-        <h1 className="text-2xl font-extrabold text-slate-900">
-          لوحة التحكم
-        </h1>
-        <p className="text-slate-500 text-sm mt-1">
-          إدارة طلبات التقييم ومراجعتها
-        </p>
+      <header className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900">
+            لوحة التحكم
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">أهلًا {displayName}</p>
+        </div>
+        <form action={signOutAction}>
+          <button
+            type="submit"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition"
+          >
+            تسجيل الخروج
+          </button>
+        </form>
       </header>
 
       <section className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -89,14 +101,14 @@ export default async function AdminPage({
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-bold text-slate-900 mb-4">طلب تقييم جديد</h2>
-        <NewRequestForm secret={secret} />
+        <NewRequestForm />
       </section>
 
       <section className="space-y-4">
         <h2 className="font-bold text-slate-900">
           تقييمات بانتظار المراجعة ({awaitingModeration.length})
         </h2>
-        <ModerationList secret={secret} reviews={awaitingModeration} />
+        <ModerationList reviews={awaitingModeration} />
       </section>
 
       <section className="space-y-3">

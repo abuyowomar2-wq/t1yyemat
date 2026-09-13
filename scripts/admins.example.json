@@ -1,0 +1,12 @@
+[
+  {
+    "email": "admin1@example.com",
+    "password": "change-me",
+    "full_name": "اسم المشرف الأول"
+  },
+  {
+    "email": "admin2@example.com",
+    "password": "change-me",
+    "full_name": "اسم المشرف الثاني"
+  }
+]

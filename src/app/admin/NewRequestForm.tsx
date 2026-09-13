@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { createReviewRequestAction } from "./actions";
 
-export function NewRequestForm({ secret }: { secret: string }) {
+export function NewRequestForm() {
   const [customerName, setCustomerName] = useState("");
   const [orderNumber, setOrderNumber] = useState("");
   const [productName, setProductName] = useState("");
@@ -21,7 +21,7 @@ export function NewRequestForm({ secret }: { secret: string }) {
           setError(null);
           setLink(null);
           startTransition(async () => {
-            const res = await createReviewRequestAction(secret, {
+            const res = await createReviewRequestAction({
               customerName,
               orderNumber,
               productName,

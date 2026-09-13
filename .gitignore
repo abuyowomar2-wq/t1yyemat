@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# real admin credentials for scripts/create-admins.mjs — never commit these
+scripts/admins.local.json
+
 # vercel
 .vercel
 
