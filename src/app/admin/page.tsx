@@ -121,6 +121,7 @@ export default async function AdminPage() {
                 <th className="px-4 py-3 font-medium">الطلب</th>
                 <th className="px-4 py-3 font-medium">المنتج</th>
                 <th className="px-4 py-3 font-medium">التقييم</th>
+                <th className="px-4 py-3 font-medium">التعليق</th>
                 <th className="px-4 py-3 font-medium">الحالة</th>
               </tr>
             </thead>
@@ -131,6 +132,9 @@ export default async function AdminPage() {
                   <td className="px-4 py-3">{r.order_number}</td>
                   <td className="px-4 py-3">{r.product_name}</td>
                   <td className="px-4 py-3">{r.rating ?? "—"}</td>
+                  <td className="px-4 py-3 max-w-xs whitespace-pre-wrap">
+                    {r.comment ?? "—"}
+                  </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={r.status} />
                   </td>
@@ -139,7 +143,7 @@ export default async function AdminPage() {
               {reviews.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-4 py-6 text-center text-slate-400"
                   >
                     ما فيه طلبات بعد
