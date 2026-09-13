@@ -25,7 +25,10 @@ if (!supabaseUrl || !serviceRoleKey) {
 const adminsFile = join(__dirname, "admins.local.json");
 let admins;
 try {
-  admins = JSON.parse(readFileSync(adminsFile, "utf-8"));
+  // Strip a possible UTF-8 BOM — common when the file is saved from
+  // Windows editors (Notepad, PowerShell's default encoding, ...).
+  const raw = readFileSync(adminsFile, "utf-8").replace(/^﻿/, "");
+  admins = JSON.parse(raw);
 } catch {
   console.error(
     `ما لقيت ${adminsFile}.\n` +
