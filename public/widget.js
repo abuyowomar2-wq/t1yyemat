@@ -1,11 +1,14 @@
 /**
  * ويدجت تقييمات t1yyemat — يُلصق في أي صفحة متجر.
  *
- * الاستخدام:
+ * الاستخدام البسيط (يظهر تلقائيًا فوق الفوتر مباشرة، بدون أي حاجة لـ div):
+ *   <script src="https://<دومين-مشروعك>/widget.js" defer></script>
+ *
+ * أو لو تبي تتحكم بمكانه بالضبط، حط الـ div بنفسك بأي مكان بالصفحة:
  *   <div data-t1yyemat-reviews></div>
  *   <script src="https://<دومين-مشروعك>/widget.js" defer></script>
  *
- * خيارات (على نفس الـ div):
+ * خيارات (على نفس الـ div اليدوي):
  *   data-limit="10"              أقصى عدد تقييمات (افتراضي 20)
  *   data-product="اسم المنتج"    اعرض تقييمات منتج معيّن بس
  */
@@ -23,7 +26,8 @@
     ".t1y-stars-empty{color:#cbd5e1;}" +
     ".t1y-product{font-size:12px;color:#64748b;margin-top:2px;}" +
     ".t1y-comment{margin:8px 0 0;line-height:1.6;font-size:14px;}" +
-    ".t1y-loading,.t1y-empty{color:#94a3b8;font-size:14px;margin:0;}";
+    ".t1y-loading,.t1y-empty{color:#94a3b8;font-size:14px;margin:0;}" +
+    ".t1y-title{font-size:20px;font-weight:800;margin:0 0 16px;}";
 
   function getApiOrigin() {
     var el = document.currentScript;
@@ -107,7 +111,9 @@
     mount.innerHTML = html;
   }
 
-  function initWidget(container) {
+  function initWidget(container, options) {
+    options = options || {};
+
     if (!API_ORIGIN) {
       container.innerHTML = '<p class="t1y-empty">تعذر تحميل التقييمات.</p>';
       return;
@@ -123,13 +129,23 @@
     var style = document.createElement("style");
     style.textContent = WIDGET_CSS;
 
+    var wrapper = document.createElement("div");
+    wrapper.className = "t1y-widget";
+    wrapper.dir = "rtl";
+
+    if (options.showTitle) {
+      var title = document.createElement("h2");
+      title.className = "t1y-title";
+      title.textContent = "آراء عملائنا";
+      wrapper.appendChild(title);
+    }
+
     var mount = document.createElement("div");
-    mount.className = "t1y-widget";
-    mount.dir = "rtl";
     mount.innerHTML = '<p class="t1y-loading">جارٍ تحميل التقييمات...</p>';
+    wrapper.appendChild(mount);
 
     host.appendChild(style);
-    host.appendChild(mount);
+    host.appendChild(wrapper);
 
     var url = API_ORIGIN + "/api/reviews?limit=" + encodeURIComponent(limit);
     if (product) url += "&product=" + encodeURIComponent(product);
@@ -146,11 +162,39 @@
       });
   }
 
+  function findFooter() {
+    return document.querySelector(
+      "footer, [role='contentinfo'], #footer, .footer"
+    );
+  }
+
   function boot() {
     var containers = document.querySelectorAll("[data-t1yyemat-reviews]");
-    for (var i = 0; i < containers.length; i++) {
-      initWidget(containers[i]);
+
+    if (containers.length > 0) {
+      for (var i = 0; i < containers.length; i++) {
+        initWidget(containers[i]);
+      }
+      return;
     }
+
+    // ما فيه أي div محدد يدويًا — نحط الويدجت تلقائيًا فوق الفوتر مباشرة
+    // (أو بآخر الصفحة لو ما لقينا فوتر واضح)، بمسافة حوله عشان ما يلزق
+    // بالفوتر أو بالمحتوى اللي قبله.
+    var container = document.createElement("div");
+    container.style.margin = "48px auto";
+    container.style.maxWidth = "800px";
+    container.style.padding = "0 16px";
+    container.style.boxSizing = "border-box";
+
+    var footer = findFooter();
+    if (footer && footer.parentNode) {
+      footer.parentNode.insertBefore(container, footer);
+    } else {
+      document.body.appendChild(container);
+    }
+
+    initWidget(container, { showTitle: true });
   }
 
   if (document.readyState === "loading") {
