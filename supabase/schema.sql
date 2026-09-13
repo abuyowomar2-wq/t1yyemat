@@ -30,12 +30,11 @@ create policy "public reads approved reviews"
 on reviews for select
 using (status = 'approved');
 
--- سياسة: أنت (بعد تسجيل الدخول) عندك صلاحية كاملة على الجدول
--- (إنشاء طلبات تقييم، موافقة، رفض، حذف... الخ)
-create policy "authenticated admin full access"
-on reviews for all
-using (auth.role() = 'authenticated')
-with check (auth.role() = 'authenticated');
+-- ملاحظة: لوحة التحكم ما تستخدم Supabase Auth (دخول برابط سري بدون تسجيل
+-- دخول)، فكل عمليات الإدارة (إنشاء طلب، اعتماد، رفض) تمر عبر السيرفر
+-- باستخدام service_role key اللي يتجاوز RLS تلقائيًا. لهذا ما فيه سياسة
+-- "authenticated" هنا — أي مفتاح غير service_role يقدر يقرأ بس التقييمات
+-- المعتمدة، ولا يقدر يكتب على الجدول إطلاقًا.
 
 -- 3) دالة: صفحة التقييم تستخدمها لجلب بيانات العميل عن طريق التوكن
 -- ترجّع بس بيانات هذا التقييم بالذات، ما تكشف باقي الجدول
