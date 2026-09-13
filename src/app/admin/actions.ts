@@ -53,7 +53,10 @@ async function findOrCreateCustomer(fullName: string, phoneRaw: string) {
     .single();
 
   if (error || !created) {
-    return { customer: null, error: "صار خطأ أثناء حفظ بيانات العميل." };
+    return {
+      customer: null,
+      error: `صار خطأ أثناء حفظ بيانات العميل: ${error?.message ?? "unknown"}`,
+    };
   }
 
   return { customer: created, error: null };
@@ -98,7 +101,10 @@ export async function createReviewRequestAction(formData: {
     .single();
 
   if (error || !data) {
-    return { success: false, message: "صار خطأ أثناء إنشاء الطلب." };
+    return {
+      success: false,
+      message: `صار خطأ أثناء إنشاء الطلب: ${error?.message ?? "unknown"}`,
+    };
   }
 
   revalidatePath("/admin");
@@ -149,7 +155,10 @@ export async function createReviewRequestForCustomerAction(
     .single();
 
   if (error || !data) {
-    return { success: false, message: "صار خطأ أثناء إنشاء الطلب." };
+    return {
+      success: false,
+      message: `صار خطأ أثناء إنشاء الطلب: ${error?.message ?? "unknown"}`,
+    };
   }
 
   revalidatePath("/admin");
