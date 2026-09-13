@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { createReviewRequestAction } from "./actions";
+import { useRouter } from "next/navigation";
+import { createReviewRequestForCustomerAction } from "../../actions";
 
-export function NewRequestForm() {
-  const [customerName, setCustomerName] = useState("");
-  const [phone, setPhone] = useState("");
+export function NewRequestForCustomerForm({
+  customerId,
+}: {
+  customerId: string;
+}) {
+  const router = useRouter();
   const [orderNumber, setOrderNumber] = useState("");
   const [productName, setProductName] = useState("");
   const [link, setLink] = useState<string | null>(null);
@@ -22,39 +26,21 @@ export function NewRequestForm() {
           setError(null);
           setLink(null);
           startTransition(async () => {
-            const res = await createReviewRequestAction({
-              customerName,
-              phone,
-              orderNumber,
-              productName,
-            });
+            const res = await createReviewRequestForCustomerAction(
+              customerId,
+              { orderNumber, productName }
+            );
             if (!res.success) {
               setError(res.message);
               return;
             }
             setLink(res.link ?? null);
-            setCustomerName("");
-            setPhone("");
             setOrderNumber("");
             setProductName("");
+            router.refresh();
           });
         }}
       >
-        <input
-          value={customerName}
-          onChange={(e) => setCustomerName(e.target.value)}
-          placeholder="اسم العميل"
-          required
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        />
-        <input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="رقم الجوال"
-          required
-          dir="ltr"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-right"
-        />
         <input
           value={orderNumber}
           onChange={(e) => setOrderNumber(e.target.value)}
@@ -74,7 +60,7 @@ export function NewRequestForm() {
           disabled={isPending}
           className="sm:col-span-2 rounded-lg bg-slate-900 py-2.5 text-white text-sm font-medium hover:bg-slate-800 transition disabled:opacity-60"
         >
-          {isPending ? "جارٍ الإنشاء..." : "إنشاء رابط التقييم"}
+          {isPending ? "جارٍ الإنشاء..." : "إنشاء رابط تقييم لهذا العميل"}
         </button>
       </form>
 

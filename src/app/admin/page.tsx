@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -71,14 +72,22 @@ export default async function AdminPage() {
           </h1>
           <p className="text-slate-500 text-sm mt-1">أهلًا {displayName}</p>
         </div>
-        <form action={signOutAction}>
-          <button
-            type="submit"
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/customers"
             className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition"
           >
-            تسجيل الخروج
-          </button>
-        </form>
+            العملاء
+          </Link>
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition"
+            >
+              تسجيل الخروج
+            </button>
+          </form>
+        </div>
       </header>
 
       <section className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -128,7 +137,18 @@ export default async function AdminPage() {
             <tbody className="divide-y divide-slate-100">
               {reviews.map((r) => (
                 <tr key={r.id}>
-                  <td className="px-4 py-3">{r.customer_name}</td>
+                  <td className="px-4 py-3">
+                    {r.customer_id ? (
+                      <Link
+                        href={`/admin/customers/${r.customer_id}`}
+                        className="text-slate-900 underline decoration-slate-300 hover:decoration-slate-900"
+                      >
+                        {r.customer_name}
+                      </Link>
+                    ) : (
+                      r.customer_name
+                    )}
+                  </td>
                   <td className="px-4 py-3">{r.order_number}</td>
                   <td className="px-4 py-3">{r.product_name}</td>
                   <td className="px-4 py-3">{r.rating ?? "—"}</td>

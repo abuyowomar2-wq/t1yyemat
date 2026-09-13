@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { setReviewStatusAction } from "./actions";
@@ -46,7 +47,16 @@ export function ModerationList({ reviews }: { reviews: Review[] }) {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="font-semibold text-slate-900">
-                {r.customer_name}
+                {r.customer_id ? (
+                  <Link
+                    href={`/admin/customers/${r.customer_id}`}
+                    className="underline decoration-slate-300 hover:decoration-slate-900"
+                  >
+                    {r.customer_name}
+                  </Link>
+                ) : (
+                  r.customer_name
+                )}
               </p>
               <p className="text-xs text-slate-500">
                 {r.product_name} — طلب {r.order_number}
