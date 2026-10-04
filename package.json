@@ -10,6 +10,7 @@
     "create-admins": "node --env-file=.env.local scripts/create-admins.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "next": "16.3.5",
