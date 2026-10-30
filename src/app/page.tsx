@@ -8,17 +8,30 @@ export default function Home() {
           منصة التقييمات
         </h1>
         <p className="text-slate-600 leading-relaxed">
-          أداة بسيطة لجمع تقييمات عملائك بعد كل عملية شراء عبر رابط تقييم
-          خاص بكل طلب، ثم مراجعة واعتماد التقييمات قبل ما تظهر للعامة.
+          اجمع تقييمات عملائك بعد كل عملية بيع عبر رابط خاص بكل طلب، راجع
+          واعتمد التقييمات بنفسك، واحصل على صفحة عامة تشاركها كمرجع
+          لثقة عملائك — حتى لو تبيع بدون متجر، مثل البيع عبر تيليجرام.
         </p>
-        <div>
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/reviews"
+            href="/signup"
             className="inline-block rounded-lg bg-slate-900 px-6 py-3 text-white font-medium hover:bg-slate-800 transition"
           >
-            شاهد التقييمات المعتمدة
+            سجّل مجانًا
+          </Link>
+          <Link
+            href="/login"
+            className="inline-block rounded-lg border border-slate-300 px-6 py-3 text-slate-700 font-medium hover:bg-slate-50 transition"
+          >
+            تسجيل الدخول
           </Link>
         </div>
+        <p className="text-sm text-slate-400">
+          مثال حي:{" "}
+          <Link href="/reviews" className="underline">
+            تقييمات متجر شامل بلس
+          </Link>
+        </p>
       </div>
     </main>
   );
